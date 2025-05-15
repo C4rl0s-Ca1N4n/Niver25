@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Caça-Palavras</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f0f0f0;
+      padding: 20px;
+    }
+    h1 {
+      color: #333;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(36, 30px);
+      gap: 2px;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    .cell {
+      width: 30px;
+      height: 30px;
+      background-color: white;
+      border: 1px solid #ccc;
+      line-height: 30px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 16px;
+      user-select: none;
+    }
+    .cell.selected {
+      background-color: #90ee90;
+    }
+    .cell.found {
+      background-color: #32cd32 !important;
+      color: white;
+      cursor: default;
+    }
+    #success-message {
+      display: none;
+      font-size: 1.5em;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <h1>Caça-Palavras</h1>
+  <p>Encontre as 5 palavras escondidas (clique nas letras na ordem correta)</p>
+  <div class="grid" id="grid"></div>
+  <div id="success-message">🎉 Parabéns! Você encontrou todas as palavras! O código para acessar o fim é o nome de todos os Cainans que te ajudaram até aqui.</div>
+  
+  <audio autoplay loop hidden>
+    <source src="FF.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    const palavras = ["CAINAN", "BATMAN", "VADER", "PUDIM", "KISHA"];
+    const linhas = 12;
+    const colunas = 36;
+    const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const palavrasEncontradas = new Set();
+    const gridData = Array.from({ length: linhas }, () => Array(colunas).fill(''));
+    let selecaoAtual = [];
+
+    function embaralhar(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function inserirPalavras() {
+      embaralhar(palavras).forEach(palavra => {
+        let colocada = false;
+        let tentativas = 0;
+
+        while (!colocada && tentativas < 100) {
+          tentativas++;
+          const row = Math.floor(Math.random() * linhas);
+          const maxCol = colunas - palavra.length;
+          const col = Math.floor(Math.random() * (maxCol + 1));
+
+          let podeInserir = true;
+          for (let i = 0; i < palavra.length; i++) {
+            if (gridData[row][col + i] !== '') {
+              podeInserir = false;
+              break;
+            }
+          }
+
+          if (podeInserir) {
+            for (let i = 0; i < palavra.length; i++) {
+              gridData[row][col + i] = palavra[i];
+            }
+            colocada = true;
+          }
+        }
+      });
+    }
+
+    function preencherComAleatorias() {
+      for (let row = 0; row < linhas; row++) {
+        for (let col = 0; col < colunas; col++) {
+          if (gridData[row][col] === '') {
+            gridData[row][col] = letras[Math.floor(Math.random() * letras.length)];
+          }
+        }
+      }
+    }
+
+    function criarGradeVisual() {
+      const container = document.getElementById('grid');
+      container.innerHTML = '';
+
+      for (let row = 0; row < linhas; row++) {
+        for (let col = 0; col < colunas; col++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.textContent = gridData[row][col];
+          cell.dataset.row = row;
+          cell.dataset.col = col;
+
+          cell.addEventListener('click', () => {
+            if (!cell.classList.contains('selected') && !cell.classList.contains('found')) {
+              cell.classList.add('selected');
+              selecaoAtual.push(cell);
+              verificarSelecao();
+            }
+          });
+
+          container.appendChild(cell);
+        }
+      }
+    }
+
+    function verificarSelecao() {
+      const palavraFormada = selecaoAtual.map(c => c.textContent).join('');
+      const palavraReversa = palavraFormada.split('').reverse().join('');
+
+      for (const palavra of palavras) {
+        if (
+          (palavraFormada === palavra || palavraReversa === palavra) &&
+          !palavrasEncontradas.has(palavra)
+        ) {
+          palavrasEncontradas.add(palavra);
+
+          selecaoAtual.forEach(cell => {
+            cell.classList.remove('selected');
+            cell.classList.add('found');
+          });
+
+          selecaoAtual = [];
+          alert(`Você encontrou: ${palavra}`);
+          break;
+        }
+      }
+
+      // Limpa seleção se for inválida ou muito longa
+      if (
+        palavraFormada.length > 1 &&
+        !palavras.includes(palavraFormada) &&
+        !palavras.includes(palavraReversa)
+      ) {
+        if (selecaoAtual.length >= 12) {
+          limparSelecao();
+        }
+      }
+
+      if (palavrasEncontradas.size === palavras.length) {
+        document.getElementById('success-message').style.display = 'block';
+      }
+    }
+
+    function limparSelecao() {
+      selecaoAtual.forEach(cell => cell.classList.remove('selected'));
+      selecaoAtual = [];
+    }
+
+    function iniciarJogo() {
+      inserirPalavras();
+      preencherComAleatorias();
+      criarGradeVisual();
+    }
+
+    iniciarJogo();
+  </script>
+</body>
+</html>

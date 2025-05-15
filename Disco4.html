@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quebra-Cabeça 6x6</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #eef2f3;
+    }
+
+    h1 {
+      margin-top: 20px;
+    }
+
+    #puzzle {
+      width: 360px;
+      height: 360px;
+      margin: 20px auto;
+      display: flex;
+      flex-wrap: wrap;
+      border: 2px solid #333;
+    }
+
+    .piece {
+      width: 60px;
+      height: 60px;
+      box-sizing: border-box;
+      border: 1px solid #999;
+      background-image: url('https://i.postimg.cc/7h857RJg/OPP.webp');
+      background-size: 360px 360px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .selected {
+      outline: 3px solid #ff6600;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 10px;
+      cursor: pointer;
+    }
+
+    #mensagem {
+      font-size: 20px;
+      color: green;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Termine o Quebra-Cabeça</h1>
+  <div id="puzzle"></div>
+  <button onclick="embaralhar()">Embaralhar</button>
+  <div id="mensagem"></div>
+
+  <script>
+    const puzzle = document.getElementById("puzzle");
+    const mensagem = document.getElementById("mensagem");
+    const tamanho = 6; // 6x6
+    const totalPecas = tamanho * tamanho;
+    let ordemCorreta = [];
+    let pecas = [];
+    let selecionada = null;
+
+    function criarPecas() {
+      puzzle.innerHTML = '';
+      ordemCorreta = [];
+      pecas = [];
+
+      for (let i = 0; i < totalPecas; i++) {
+        const piece = document.createElement("div");
+        piece.className = "piece";
+        piece.dataset.index = i;
+        const x = (i % tamanho) * -60;
+        const y = Math.floor(i / tamanho) * -60;
+        piece.style.backgroundPosition = `${x}px ${y}px`;
+        piece.addEventListener("click", () => selecionarPeca(piece));
+        ordemCorreta.push(piece);
+        pecas.push(piece);
+        puzzle.appendChild(piece);
+      }
+    }
+
+    function embaralhar() {
+      mensagem.textContent = '';
+      selecionada = null;
+      pecas.sort(() => Math.random() - 0.5);
+      puzzle.innerHTML = '';
+      pecas.forEach(p => {
+        p.classList.remove("selected");
+        puzzle.appendChild(p);
+      });
+    }
+
+    function selecionarPeca(peca) {
+      if (selecionada === null) {
+        selecionada = peca;
+        peca.classList.add("selected");
+      } else if (selecionada === peca) {
+        // clicou na mesma, desmarca
+        peca.classList.remove("selected");
+        selecionada = null;
+      } else {
+        trocarPecas(selecionada, peca);
+        selecionada.classList.remove("selected");
+        selecionada = null;
+        verificarVitoria();
+      }
+    }
+
+    function trocarPecas(p1, p2) {
+      const idx1 = pecas.indexOf(p1);
+      const idx2 = pecas.indexOf(p2);
+      [pecas[idx1], pecas[idx2]] = [pecas[idx2], pecas[idx1]];
+      puzzle.innerHTML = '';
+      pecas.forEach(p => puzzle.appendChild(p));
+    }
+
+    function verificarVitoria() {
+      const estaCorreto = pecas.every((p, i) => p.dataset.index == i);
+      if (estaCorreto) {
+        mensagem.textContent = '🎉 Parabéns! Você completou o quebra-cabeça! O codigo para o diario 5 - OMARNAOTEMFIM';
+      }
+    }
+
+    criarPecas();
+    embaralhar();
+  </script>
+
+</body>
+</html>

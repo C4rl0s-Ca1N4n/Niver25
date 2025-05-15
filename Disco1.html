@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verificador de Palavra</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f4f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-image: url(https://i.postimg.cc/fT0Q0DHn/wp4615519.webp);
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: 100% 100%
+    }
+
+    .container {
+      background-color: rgb(81, 163, 55);
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 500px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 1rem 0;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #c7d3c8;
+      border: none;
+      color: rgb(15, 2, 2);
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #mensagem {
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Acesso ao Terminal de Informações Multiversais</h1>
+    <input type="text" id="palavraInput" placeholder="Código de Acesso..." />
+    <button onclick="verificarPalavra()">Acessar</button>
+    <p id="mensagem"></p>
+  </div>
+
+  <audio autoplay loop hidden>
+    <source src="N25.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    function verificarPalavra() {
+      const palavraCorreta = "cainanevil";
+      const entrada = document.getElementById("palavraInput").value.trim().toLowerCase();
+      const mensagem = document.getElementById("mensagem");
+
+      if (entrada === palavraCorreta) {
+        mensagem.textContent = "✅ Acesso Garantido! Chave para abrir o Diario 2 - H7F93K00C33";
+        mensagem.style.color = "green";
+      } else {
+        mensagem.textContent = "❌ Palavra incorreta. Tente novamente.";
+        mensagem.style.color = "red";
+      }
+    }
+  </script>
+</body>
+</html>

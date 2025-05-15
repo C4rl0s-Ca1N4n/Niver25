@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jogo de 21</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #2f4f4f;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    #game {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    #player-cards, #dealer-cards {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 10px 0;
+    }
+
+    .card {
+      width: 60px;
+      height: 90px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #fff;
+      color: black;
+      font-size: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .buttons {
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .result {
+      margin-top: 20px;
+      font-size: 24px;
+    }
+
+    #success-message {
+      color: green;
+      font-size: 28px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div id="game">
+    <h1>Jogo de 21</h1>
+    <h3>Pontuação do Dealer:</h3>
+    <p id="dealer-score">0</p>
+    <div id="dealer-cards">
+      <div class="card" id="dealer-card-1"></div>
+      <div class="card" id="dealer-card-2"></div>
+    </div>
+    <h3>Suas Cartas:</h3>
+    <div id="player-cards"></div>
+    <h3>Pontuação:</h3>
+    <p id="player-score">0</p>
+    <div class="buttons">
+      <button onclick="hit()">Pedir Carta</button>
+      <button onclick="stand()">Parar</button>
+      <button onclick="restart()">Reiniciar</button>
+    </div>
+    <div class="result" id="result"></div>
+    <div id="success-message"></div>
+  </div>
+
+  <script>
+    const successMessages = [
+      "Jogou bem, o codigo n esta aqui!",
+      "Sem codigo dessa vez. Vitória garantida!",
+      "Incrível! Você superou o dealer! Mas sem CODE",
+      "Boa jogada! O codigo para o Diario 4 - naniac",
+      "Mandou bem demais! Mas o codigo não está aqui!"
+    ];
+    const suits = ["♥", "♦", "♣", "♠"];
+    const values = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
+    const playerCards = [];
+    const dealerCards = [];
+    let playerScore = 0;
+    let dealerScore = 0;
+    let deck = [];
+    let gameOver = false;
+
+    // Função para criar o baralho
+    function createDeck() {
+      deck = [];
+      for (let suit of suits) {
+        for (let value of values) {
+          deck.push({ suit, value });
+        }
+      }
+      shuffleDeck();
+    }
+
+    // Função para embaralhar o baralho
+    function shuffleDeck() {
+      for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+    }
+
+    // Função para calcular a pontuação de uma mão
+    function calculateScore(cards) {
+      let score = 0;
+      let aceCount = 0;
+
+      for (let card of cards) {
+        if (card.value === "A") {
+          aceCount++;
+          score += 11;
+        } else if (["K", "Q", "J"].includes(card.value)) {
+          score += 10;
+        } else {
+          score += parseInt(card.value);
+        }
+      }
+
+      // Ajuste se houver ases
+      while (score > 21 && aceCount > 0) {
+        score -= 10;
+        aceCount--;
+      }
+
+      return score;
+    }
+
+    // Função para distribuir as cartas
+    function dealCard(isPlayer) {
+      const card = deck.pop();
+      if (isPlayer) {
+        playerCards.push(card);
+        playerScore = calculateScore(playerCards);
+        displayCards("player");
+      } else {
+        dealerCards.push(card);
+        dealerScore = calculateScore(dealerCards);
+        displayCards("dealer");
+      }
+    }
+
+    // Função para mostrar as cartas e pontuação
+    function displayCards(player) {
+      const cardsContainer = document.getElementById(`${player}-cards`);
+      const scoreElement = document.getElementById(`${player}-score`);
+      cardsContainer.innerHTML = "";
+      for (let i = 0; i < (player === "dealer" ? dealerCards.length : playerCards.length); i++) {
+        const cardElement = document.createElement("div");
+        cardElement.classList.add("card");
+        const card = player === "dealer" ? dealerCards[i] : playerCards[i];
+        cardElement.textContent = `${card.value}${card.suit}`;
+        cardsContainer.appendChild(cardElement);
+      }
+
+      scoreElement.textContent = player === "dealer" ? dealerScore : playerScore;
+    }
+
+    // Função para iniciar o jogo
+    function startGame() {
+      createDeck();
+      playerCards.length = 0;
+      dealerCards.length = 0;
+      playerScore = 0;
+      dealerScore = 0;
+      gameOver = false;
+      dealCard(true); // Jogador
+      dealCard(true); // Jogador
+      dealCard(false); // Dealer
+      dealCard(false); // Dealer
+      displayCards("player");
+      displayCards("dealer");
+
+      document.getElementById("result").textContent = "";
+      document.getElementById("success-message").textContent = "";
+    }
+
+    // Função para pedir carta
+    function hit() {
+      if (gameOver) return;
+      if (playerScore < 21) {
+        dealCard(true);
+        if (playerScore > 21) {
+          document.getElementById("result").textContent = "Você perdeu! Excedeu 21.";
+          gameOver = true;
+        }
+      }
+    }
+
+    // Função para fazer o dealer jogar automaticamente após o jogador parar
+    function dealerPlay() {
+      // O dealer joga automaticamente até atingir pelo menos 17 pontos
+      while (dealerScore < 17 && dealerScore <= 21) {
+        dealCard(false);
+      }
+
+      // Verificar o resultado
+      if (dealerScore > 21) {
+        document.getElementById("result").textContent = "O dealer perdeu! Você ganhou!";
+        document.getElementById("success-message").textContent =
+          successMessages[Math.floor(Math.random() * successMessages.length)];
+      } else if (playerScore > dealerScore) {
+        document.getElementById("result").textContent = "Você ganhou!";
+        document.getElementById("success-message").textContent =
+          successMessages[Math.floor(Math.random() * successMessages.length)];
+      } else if (playerScore < dealerScore) {
+        document.getElementById("result").textContent = "Você perdeu! O dealer ganhou.";
+      } else {
+        document.getElementById("result").textContent = "Empate!";
+      }
+
+      gameOver = true; // Marca o fim do jogo
+    }
+
+    // Função para quando o jogador decidir parar
+    function stand() {
+        if (gameOver) return; // Se o jogo já acabou, não faz nada
+        if (playerScore > 21) return; // Se o jogador já perdeu, não permite o dealer jogar
+        dealerPlay(); // Caso contrário, dealer joga
+    }
+
+
+    // Função para reiniciar o jogo (recarregar a página)
+    function restart() {
+      location.reload(); // Recarrega a página, reiniciando o jogo
+    }
+
+    // Inicia o jogo
+    startGame();
+  </script>
+</body>
+</html>
