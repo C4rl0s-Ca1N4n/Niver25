@@ -3,7 +3,7 @@ const container = document.getElementById('circle');
 
 // Defina as senhas para cada link
 const passwords = {
-  'Disco1.html': '03-01-1982',
+  'Disco1.html': '03-01-1892',
   'Disco2.html': 'emperor',
   'Disco3.html': 'kisha',
   'Disco4.html': 'pudim',
